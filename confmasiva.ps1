@@ -3,8 +3,6 @@ $ErrorActionPreference = "Stop"
 $usersfile = Import-Csv "C:\Users\Administrador\Documents\UsuariosWindowsServer.csv"
 $deptfile = Import-Csv "C:\Users\Administrador\Documents\Departamentos.csv"
 
-## Acciones que solo se realizan una vez
-
 foreach ($line in $deptfile){
     # Campos a utilizar del fichero CSV
     $departamento = $line.NombreDepartamento
@@ -56,7 +54,7 @@ foreach ($user in $usersfile) {
     $pass = $user.Password
     # 3.1 - Crear directorio personal de cada usuario
     try {
-        New-Item -Type Directory -Path ("C:\Compartida\Usuarios\" + $user.Departamento + "\" + $usuario)
+        New-Item -Type Directory -Path ("C:\Compartida\Usuarios\" + $departamento + "\" + $usuario)
     }
     catch [System.IO.IOException] {
         Write-Output ("Directorio personal del usuario " +  $usuario + " ya creado")
@@ -72,7 +70,7 @@ foreach ($user in $usersfile) {
     Add-ADGroupMember -Identity $user.Departamento -Members $usuario
     # 3.4 - Crear compartición en Samba para cada usuario
     try {
-        New-SmbShare -Name  $usuario -Path ("C:\Compartida\Usuarios\" +  $user.Departamento + "\" +$usuario) -ErrorAction Stop
+        New-SmbShare -Name  $usuario -Path ("C:\Compartida\Usuarios\" +  $departamento + "\" +$usuario) -ErrorAction Stop
     }
     catch [Microsoft.Management.Infrastructure.CimException] {
         Write-Output "Compartición de SMB ya creada"
