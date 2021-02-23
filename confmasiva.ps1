@@ -3,6 +3,8 @@ $ErrorActionPreference = "Stop"
 $usersfile = Import-Csv "C:\Users\Administrador\Documents\UsuariosWindowsServer.csv"
 $deptfile = Import-Csv "C:\Users\Administrador\Documents\Departamentos.csv"
 
+## Acciones que solo se realizan una vez
+
 foreach ($line in $deptfile){
     # Campos a utilizar del fichero CSV
     $departamento = $line.NombreDepartamento
@@ -29,6 +31,14 @@ foreach ($line in $deptfile){
     }
     # 1.4 - Darle permisos de acceso a cada grupo y eliminar a Todos
     Grant-SmbShareAccess -Name ("Departamento" + $departamento) -AccessRight Change -AccountName $departamento -Force
+    
+    if ($departamento -ne "Informatica"){
+        Grant-SmbShareAccess -Name ("Departamento" + $departamento) -AccessRight Full -AccountName Informatica -Force
+        Grant-SmbShareAccess -Name ("Departamento" + $departamento) -AccessRight Change -AccountName $departamento -Force
+    }
+    elseif ($departamento -eq "Informatica") {
+        Grant-SmbShareAccess -Name ("Departamento" + $departamento) -AccessRight Full -AccountName Informatica -Force
+    }
     Revoke-SmbShareAccess -Name ("Departamento" + $departamento) -AccountName Todos -Force
     # 1.5 Crear Unidad Organizativa para cada departamento
     try{
@@ -39,7 +49,7 @@ foreach ($line in $deptfile){
     }
 }
 
-# 2 - Creación del contenedor de los directorios personales de los usuarios
+# 2.1 - Creación del contenedor de los directorios personales de los usuarios
 try {
     New-Item -Type Directory -Path "C:\Compartida\Usuarios\"
 }
@@ -54,7 +64,7 @@ foreach ($user in $usersfile) {
     $pass = $user.Password
     # 3.1 - Crear directorio personal de cada usuario
     try {
-        New-Item -Type Directory -Path ("C:\Compartida\Usuarios\" + $departamento + "\" + $usuario)
+        New-Item -Type Directory -Path ("C:\Compartida\Usuarios\" + $user.Departamento + "\" + $usuario)
     }
     catch [System.IO.IOException] {
         Write-Output ("Directorio personal del usuario " +  $usuario + " ya creado")
@@ -70,7 +80,7 @@ foreach ($user in $usersfile) {
     Add-ADGroupMember -Identity $user.Departamento -Members $usuario
     # 3.4 - Crear compartición en Samba para cada usuario
     try {
-        New-SmbShare -Name  $usuario -Path ("C:\Compartida\Usuarios\" +  $departamento + "\" +$usuario) -ErrorAction Stop
+        New-SmbShare -Name  $usuario -Path ("C:\Compartida\Usuarios\" +  $user.Departamento + "\" +$usuario) -ErrorAction Stop
     }
     catch [Microsoft.Management.Infrastructure.CimException] {
         Write-Output "Compartición de SMB ya creada"
