@@ -3,8 +3,6 @@ $ErrorActionPreference = "Stop"
 $usersfile = Import-Csv "C:\Users\Administrador\Documents\UsuariosWindowsServer.csv"
 $deptfile = Import-Csv "C:\Users\Administrador\Documents\Departamentos.csv"
 
-## Acciones que solo se realizan una vez
-
 foreach ($line in $deptfile){
     # Campos a utilizar del fichero CSV
     $departamento = $line.NombreDepartamento
