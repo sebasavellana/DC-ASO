@@ -1,4 +1,3 @@
-# powershell-aso
-PowerShell ASO
+# Automatización de Samba y Active Directory
 
-Ejercicios de PowerShell para la automatización de la creación de una estructura de usuarios, grupos y comparticiones en Active Directory
+Automatización de la gestión de controladores de dominio en Samba y Active Directory con PowerShell y Python
